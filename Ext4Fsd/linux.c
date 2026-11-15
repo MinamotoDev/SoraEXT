@@ -1008,6 +1008,9 @@ int _strnicmp(const char* str1, const char* str2, size_t count)
 
 #if !defined(_M_ARM64) && !defined(_M_ARM)
 
+/* Keep the local implementations when MSVC enables these intrinsics. */
+#pragma function(strncmp, strncpy)
+
 int strncmp(const char* str1, const char* str2, size_t count)
 {
 	unsigned char c1, c2;

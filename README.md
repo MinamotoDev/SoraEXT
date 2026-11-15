@@ -1,176 +1,154 @@
+<p align="center">
+  <img src="Assets/SoraEXT.png" width="160" alt="SoraEXT icon">
+</p>
 
-Latest release
---------------
+<h1 align="center">SoraEXT</h1>
 
-    Signed driver for Windows 10 and Windows 11:
-    https://www.accum.se/~bosse/ext2fsd/0.71/Ext2Fsd-0.71-setup.exe
+[English](README.md) · [日本語](docs/README.ja.md) · [한국어](docs/README.ko.md) · [简体中文](docs/README.zh-cn.md) · [正體中文](docs/README.zh-tw.md)
 
-    Updated Ext2Mgr https://www.accum.se/~bosse/ext2fsd/0.71/Ext2Mgr.exe
-    that gives more detailed information on the type of filesystems on
-    the disk. If an on disk filesystem contains new ext4 features that
-    is not supported by the Windows driver it will show a '+' sign after
-    the filesystem name, e.g "EXT4+". You can run this application
-    together with an already installed driver.
+<p align="center">A native Windows tool for mounting and managing Linux partitions</p>
 
+<p align="center">
+  <a href="RELEASE_NOTE.md#en">Release notes</a> ·
+  <a href="https://github.com/MinamotoDev/SoraEXT/releases">Releases</a> ·
+  <a href="https://github.com/MinamotoDev/SoraEXT/issues">Report an issue</a>
+</p>
 
-Changes to the source code in git after latest release
-------------------------------------------------------
+SoraEXT provides a native Windows interface built with **WinUI 3**. It uses the officially signed **Ext4Fsd** driver to access EXT2, EXT3 and EXT4 partitions, with drive-letter management, read-only mode and silent mounting at startup.
 
-    Most users can continue to use the latest release, it contains
-    an install program and a signed driver. Below is a list of
-    what has been implemented in the source code in git since then.
-    If you need any of these features you can compile the driver
-    or application yourself.
+No WSL or virtual machine is required. The interface, startup mounting agent and filesystem driver run independently, so mounted partitions remain accessible after you close the app.
 
-    Driver:
+## Features
 
-    - Corrected an error that made the debug version of the driver
-      crash. A number of calls to Ext2FreePool where misstakenly
-      replaced with direct calls to ExFreePool. This error can
-      not happen in the release version of the driver.
+- **Partition details**: view the filesystem, capacity, free space, drive letter, access mode and volume identifier.
+- **EXT mounting**: assign a drive letter, choose read-only or read/write access, and configure mounting at startup.
+- **Silent startup mounting**: a scheduled task running as SYSTEM restores configured drive letters by filesystem UUID, without opening the interface.
+- **Windows partitions**: view NTFS partitions and open them in File Explorer; assign and remove drive letters for ReFS.
+- **Partition filtering**: hide EFI, MSR, recovery and hidden Windows partitions, while continuing to scan Linux data partitions that Windows marks as hidden.
+- **Built with WinUI**: system, light and dark themes, with Mica and native animations on supported systems.
+- **Automatic refresh**: refresh when returning to the window, with a minimum interval of 15 seconds; press `F5` to refresh manually.
 
-    - The existing time fields in the superblock and the inodes
-      is using 32-bit values for time in seconds since 1970. They
-      will overflow in 2038. The ext4 filesystem has therefore
-      been extended with new time fields. In the superblock they
-      have names ending in "_hi" containing the high 8-bit of the
-      the seconds while the existing time fields contain the lower
-      32-bit. In the inodes the new fileds has names ending in
-      "_extra". They contain both the high 2-bit of the seconds,
-      that is bit 33 and 34 and also the nano seconds encoded as
-      (nsec << 2 | epoch) The existing fields contain the low 32-bit
-      of the seconds.
+SoraEXT currently focuses on mounting and access management. It does not create, delete, format or resize partitions.
 
-    - The call "query volume information" will read the fields
-      s_mkfs_time and s_mkfs_time_hi from the superblock.
+## System requirements
 
-    - The fields s_mtime and s_mtime_hi in the superblock will be
-      updated with the current time at mount time.
+| Item | Requirement |
+| --- | --- |
+| OS | Windows 11 |
+| Architecture | x64 |
+| Permissions | UAC approval required |
+| Filesystem driver | Ext4Fsd 0.71, included in the installer |
+| Runtimes | .NET and Windows App SDK runtime files included |
 
-    - The fields s_wtime and s_wtime_hi in the superblock will be
-      updated with the current time at shutdown.
+## Installation and usage
 
-    Application:
+1. Run the installer and approve the UAC prompt.
+2. Read and accept the license, then select **Install**.
+3. When installation finishes, select **Launch** to open SoraEXT.
+4. Select an EXT partition, choose **Mount**, set its drive letter and access mode, and save.
+5. To restore the mount at startup, enable **Mount at startup** in the partition's mount settings.
 
-    - If an on disk filesystem contains new ext4 features that is
-      not supported by the Windows driver a '+' sign will be shown
-      after the filesystem name, e.g "EXT4+".
+The installer deploys the app, official driver and startup agent, and creates a Start menu shortcut and a Windows uninstall entry. An existing matching driver is verified and reused.
 
-    - More filesystems are recognized. The main window with
-      a list of disks and partitions will now tell the type of
-      filesystem for BTRFS, XFS, BSD, LVM and RAID (MD) in
-      adidition to EXT
+### Installation and data locations
 
-    - The used size of swap partitions is listed as zero.
+| Content | Default location |
+| --- | --- |
+| App | `C:\Program Files\MinamotoDev\SoraEXT` |
+| Settings | `%ProgramData%\SoraEXT\settings.json` |
+| Setup log | `%ProgramData%\SoraEXT\Logs\setup.log` |
+| Operation logs | `%ProgramData%\SoraEXT\Logs\operations-YYYY-MM-DD.log` |
+| Startup mounting logs | `%ProgramData%\SoraEXT\Logs\mount-YYYY-MM-DD.log` |
 
-    - The donate dialog box is disabled because the information in
-      it is outdated.
+The startup task is named `SoraEXTMount`.
 
+### Uninstalling
 
-About
------
+Uninstall SoraEXT from **Installed apps** in Windows to remove the app, startup task and shortcuts. User settings and logs are kept.
 
-    This is a branch of the Ext2Fsd project by Matt Wu where I try to
-    implement support for metadata checksums and jbd2. I have also
-    updated the project so it can be compiled with Visual Studio 2019
-    and Visual Studio 2022.
-    The current status of the development is that all metadata checksums
-    is implemented and jbd2 is ported to support 64-bit blocknumbers.
-    The driver is now ready to be tested!
-    This work is dedicated to my mother Berit Ingegerd Branten.
-    Bo Branten <bosse@accum.se>
+Ext4Fsd has its own official uninstaller. To remove the driver, uninstall it separately and restart when prompted.
 
+## Known issues
 
-Test
-----
+- **EXT unmounting may stall**: the driver may remain in the `FSCTL_LOCK_VOLUME` volume-lock stage.
+- **Recycle Bin on EXT partitions**: Recycle Bin functionality currently has issues.
 
-    To test this driver run the installation programs:
-    Signed driver for Windows 10 and Windows 11:
-    https://www.accum.se/~bosse/ext2fsd/0.71/Ext2Fsd-0.71-setup.exe
-    Signed driver files for manual install: (even ARM/ARM64)
-    https://www.accum.se/~bosse/ext2fsd/0.71/signed/
-    Unsigned driver for Windows XP, Windows Vista, Windows 7 and Windows 8:
-    https://www.accum.se/~bosse/ext2fsd/0.71/Ext2Fsd-0.71-setup-xp.exe
+## Building from source
 
-    If you compile the driver yourself you only need to run the installation
-    program once, then you can copy your driver file over the old in
-    \windows\system32\drivers.
-    Now you can read and write ext4 filesystems using the new features
-    metadata checksums and 64-bit blocknumbers from Windows.
+### Development environment
 
+- Windows x64.
+- .NET 10 SDK.
+- PowerShell 7.
+- Visual Studio C++ Build Tools and the Windows SDK for WinUI XAML compilation.
+- An internet connection to restore NuGet dependencies on the first build.
 
-Introduction
-------------
+The app and installer use Windows App SDK `2.6.5`.
 
-    Ext4Fsd is an ext2/3/4 file system driver for Windows (XP/Vista/7/8/10/11).
-    It's a free and open-source software, everyone can modify or distribute
-    under GNU GPLv2.
+### Building the app
 
+Run these commands from the repository root:
 
-Active Developers
------------------
+```powershell
+# Build the app and startup agent, then run checks
+.\build-ui.ps1
 
-    Bo Branten : http://github.com/bobranten
-                 http://www.accum.se/~bosse
+# Publish a self-contained development build
+.\build-ui.ps1 -Publish
+```
 
-    Thanks to Olof Lagerkvist https://github.com/LTRData
-    for important help to this project!
+Development builds are written to `artifacts\SoraEXT-Dev-0.N.0`. The script increments the version based on existing directories. Keep the entire published directory when running the app.
 
+### Building the installer
 
-Previous Developers
--------------------
+```powershell
+# Prepare a cache directory for the official driver installer
+New-Item -ItemType Directory -Path .\artifacts\downloads -Force
 
-    Matt Wu : http://github.com/matt-wu
-              http://blog.dynox.cn
+.\build-release.ps1 `
+  -DriverInstaller .\artifacts\downloads\Ext2Fsd-0.71-setup.exe
+```
 
-    KaHo Ng : http://github.com/ngkaho1234
+If the specified file is missing, the script downloads the official installer and verifies its SHA-256 checksum. Output:
 
+```text
+artifacts\SoraEXT-0.1.0-release\SoraEXT-0.1.0-release-setup.exe
+```
 
-Old Development Website
------------------------
+Close any installer running from that path before rebuilding it.
 
-    Matt Wu <mattwu@163.com>
-    http://www.ext2fsd.com
+### Checks and interface preview
 
+```powershell
+# Check the protocol, configuration, superblock parsing and localization
+dotnet run --project SoraEXT.Tests -c Release
 
-Supported Features by Ext4Fsd
------------------------------
+# Read-only scan of local partitions
+dotnet run --project SoraEXT.Tests -c Release -- --scan
+```
 
-    1, flexible inode size: > 128 bytes, up to block size
-    2, dir_index:    htree directory index
-    3, filetype:     extra file mode in dentry
-    4, large_file:   > 4G files supported
-    5, sparse_super: super block backup in group descriptor
-    6, uninit_bg:    fast fsck and group checksum
-    7, extent:       full support with extending and shrinking.
-    8, journal:      only support replay for internal journal
-    9, flex_bg:      first flexible metadata group
-    10, symlink and hardlink
-    11, mount-as-user: specifed uid/gid by user
+The published `SoraEXT.exe` supports `--demo` to preview the interface using sample data. Add `--language zh-Hans`, `zh-Hant`, `en`, `ja` or `ko` to preview a specific language.
 
+## Project structure
 
-Read-only Ext4 Features
------------------------
+| Directory | Contents |
+| --- | --- |
+| `SoraEXT.App` | WinUI 3 app interface |
+| `SoraEXT.Core` | Partition scanning, driver protocol and mount configuration |
+| `SoraEXT.Agent` | Silent startup mounting agent |
+| `SoraEXT.Setup` | WinUI 3 installer interface |
+| `SoraEXT.Bootstrap` | Single-file installer bootstrapper |
+| `SoraEXT.Tests` | Protocol, configuration and localization checks |
+| `Setup` | Deployment scripts, packaging helpers and setup documentation |
+| `Assets` | App icons |
+| `Ext4Fsd`, `Ext2Srv`, `Ext2Mgr` | Upstream driver, service and management tool source |
 
-    If any of the ext4 features below is present on a filesystem
-    the Windows driver will automatically mount the fs read-only:
+The legacy tools and driver source are built separately from the WinUI projects using `build.ps1` / `Ext4Fsd.sln`. Release installers use the officially signed driver.
 
-    1, EXT4_FEATURE_RO_COMPAT_BIGALLOC
-    2, EXT4_FEATURE_RO_COMPAT_QUOTA
-    3, EXT4_FEATURE_RO_COMPAT_PROJECT
-    4, EXT4_FEATURE_RO_COMPAT_VERITY
-    5, EXT4_FEATURE_RO_COMPAT_ORPHAN_PRESENT
+## Origins and license
 
+SoraEXT is based on [bobranten/Ext4Fsd](https://github.com/bobranten/Ext4Fsd), which originated from Matt Wu's Ext2Fsd project.
 
-Unsupported Ext4 Features
----------------------------
+New code is licensed under **GPL-2.0**. See [Ext4Fsd/COPYRIGHT.TXT](Ext4Fsd/COPYRIGHT.TXT) for the upstream license and copyright notices. The original project README is preserved in [README.Ext4Fsd.md](README.Ext4Fsd.md). Third-party SDKs, runtimes and related components retain their own licenses.
 
-    If any of the ext4 features below is present on a filesystem
-    the Windows driver can not mount the fs at all:
-
-    1, EXT4_FEATURE_INCOMPAT_EA_INODE (extended attributes)
-    2, EXT4_FEATURE_INCOMPAT_MMP (multiple mount protection)
-    3, EXT4_FEATURE_INCOMPAT_INLINE_DATA (storing small files in inode)
-    4, EXT4_FEATURE_INCOMPAT_ENCRYPT
-    5, EXT4_FEATURE_INCOMPAT_CASEFOLD (case insensitive file names (claimed to be used by SteamOS as default))
-    6, EXT4_FEATURE_INCOMPAT_LARGEDIR (3-level htree)
+Thanks to the authors and contributors of Ext2Fsd and Ext4Fsd.

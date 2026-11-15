@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="SoraEXT.Core/SoraEXT.Core.csproj" />
+  <Project Path="SoraEXT.App/SoraEXT.App.csproj" />
+  <Project Path="SoraEXT.Agent/SoraEXT.Agent.csproj" />
+  <Project Path="SoraEXT.Tests/SoraEXT.Tests.csproj" />
+</Solution>

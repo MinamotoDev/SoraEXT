@@ -4,3 +4,14 @@ Release/
 *.vcxproj.user
 Ext2Fsd-setup.exe
 */cab/
+**/bin/
+**/obj/
+artifacts/
+*.log
+*.suo
+*.csproj.user
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
